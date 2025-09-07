@@ -1,0 +1,62 @@
+syntax = "proto3";
+package profile_user_country;
+
+option java_package = "profile_user_country";
+option java_multiple_files = true;                // cada message vira uma classe
+option java_outer_classname = "ProfileUserCountryProto";
+
+
+// ====== Model ======
+message ProfileUserCountry {
+  string id = 1;           // UUID (PK)
+  string id_usuario = 2;   // UUID (FK usuário)
+  string id_pais = 3;      // UUID (FK país)
+  string nome_usuario = 4; // VARCHAR
+  string sigla_pais = 5;   // VARCHAR (ex.: BR)
+}
+
+// ====== Requests/Responses ======
+message CreateProfileUserCountryRequest {
+  string id_usuario = 1;
+  string id_pais = 2;
+  string nome_usuario = 3;
+  string sigla_pais = 4;
+}
+message GetProfileUserCountryRequest { string id = 1; }
+
+message UpdateProfileUserCountryRequest {
+  string id = 1;
+  // updates parciais: enviar somente campos a alterar
+  string id_usuario = 2;
+  string id_pais = 3;
+  string nome_usuario = 4;
+  string sigla_pais = 5;
+}
+
+message DeleteProfileUserCountryRequest { string id = 1; }
+message DeleteProfileUserCountryResponse { bool success = 1; }
+
+message ListProfileUserCountryRequest {
+  // filtros opcionais
+  string id_usuario = 1;
+  string id_pais = 2;
+
+  // paginação opcional
+  int32 page = 10;   // 0-based
+  int32 size = 11;   // itens por página
+}
+message ListProfileUserCountryResponse {
+  repeated ProfileUserCountry items = 1;
+  int64 total = 2; // total geral para paginação
+  int32 page = 3;
+  int32 size = 4;
+}
+
+// ====== Service ======
+service ProfileUserCountryService {
+  rpc Create (CreateProfileUserCountryRequest) returns (ProfileUserCountry);
+  rpc GetById (GetProfileUserCountryRequest) returns (ProfileUserCountry);
+  rpc List (ListProfileUserCountryRequest) returns (ListProfileUserCountryResponse);
+  rpc Update (UpdateProfileUserCountryRequest) returns (ProfileUserCountry);
+  rpc Delete (DeleteProfileUserCountryRequest) returns (DeleteProfileUserCountryResponse);
+}

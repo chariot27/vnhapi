@@ -1,0 +1,42 @@
+// src/main/proto/api_log.proto
+syntax = "proto3";
+package api_log;
+
+option java_package = "api_log";
+option java_multiple_files = true;
+option java_outer_classname = "ApiLogProto";
+
+message ApiLog {
+  string id = 1;           // UUID
+  string mensagem = 2;     // text
+  string localizacao = 3;  // controller#metodo
+  string status = 4;       // erro|correto|requisição suspeita
+  string created_at = 5;   // ISO-8601
+}
+
+message CreateApiLogRequest {
+  string mensagem = 1;
+  string localizacao = 2;
+  string status = 3;
+}
+
+message GetApiLogRequest { string id = 1; }
+
+message ListApiLogsRequest {
+  string status = 1;   // opcional
+  int32 page = 10;     // 0-based
+  int32 size = 11;     // itens por página
+}
+
+message ListApiLogsResponse {
+  repeated ApiLog items = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 size = 4;
+}
+
+service ApiLogService {
+  rpc Create (CreateApiLogRequest) returns (ApiLog);
+  rpc GetById (GetApiLogRequest) returns (ApiLog);
+  rpc List (ListApiLogsRequest) returns (ListApiLogsResponse);
+}

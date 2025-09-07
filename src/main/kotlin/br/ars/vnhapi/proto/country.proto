@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package country;
+
+// Representa um país
+message Country {
+  // Identificador único (UUID)
+  string id = 1;
+
+  // Nome do país (texto livre)
+  string nome = 2;
+
+  // Sigla (abreviação, ex: BR, US)
+  string sigla = 3;
+}
+
+// Serviço gRPC para CRUD de países
+service CountryService {
+  rpc CreateCountry (Country) returns (Country);
+  rpc GetCountryById (GetCountryRequest) returns (Country);
+  rpc ListCountries (ListCountriesRequest) returns (ListCountriesResponse);
+  rpc UpdateCountry (Country) returns (Country);
+  rpc DeleteCountry (DeleteCountryRequest) returns (DeleteCountryResponse);
+}
+
+// Requests e Responses auxiliares
+message GetCountryRequest {
+  string id = 1;
+}
+
+message ListCountriesRequest {}
+
+message ListCountriesResponse {
+  repeated Country countries = 1;
+}
+
+message DeleteCountryRequest {
+  string id = 1;
+}
+
+message DeleteCountryResponse {
+  bool success = 1;
+}

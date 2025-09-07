@@ -1,0 +1,72 @@
+// src/main/kotlin/br/ars/vnhapi/proto/user.proto
+syntax = "proto3";
+
+package br.ars.vnhapi.proto;
+option java_multiple_files = true;
+option java_package = "br.ars.vnhapi.proto";
+option java_outer_classname = "UserProto";
+
+message User {
+  string id = 1;
+  string avatar = 2;
+  string email = 3;
+  string username = 4;
+  string phone = 5;
+  string bio = 6;
+  repeated string tags = 7;
+  bool ativo = 8;
+}
+
+message CreateUserRequest {
+  string avatar = 1;
+  string email = 2;
+  string username = 3;
+  string password = 4; // plain. será hasheada no serviço
+  string phone = 5;
+  string bio = 6;
+  repeated string tags = 7;
+  bool ativo = 8;
+}
+
+message GetUserRequest { string id = 1; }
+
+message UpdateUserRequest {
+  string id = 1;
+
+  // campos opcionais: usar presence
+  optional string avatar = 2;
+  optional string username = 3;
+  optional string phone = 4;
+  optional string bio = 5;
+  repeated string tags = 6; // se vazio, ignore no serviço
+  optional bool ativo = 7;
+  optional string password = 8; // se presente e não vazio, re-hash
+}
+
+message DeleteUserRequest { string id = 1; }
+
+message ListUsersRequest {
+  int32 page = 1;       // 0-based
+  int32 size = 2;       // default 20
+  string q = 3;         // filtro simples: email/username contém
+  bool onlyActive = 4;  // true = ativo = 1
+}
+
+message ListUsersResponse {
+  repeated User items = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 size = 4;
+}
+
+message EmptyResponse {
+
+}
+
+service UserService {
+  rpc Create (CreateUserRequest) returns (User);
+  rpc Get    (GetUserRequest)    returns (User);
+  rpc Update (UpdateUserRequest) returns (User);
+  rpc Delete (DeleteUserRequest) returns (EmptyResponse);
+  rpc List   (ListUsersRequest)  returns (ListUsersResponse);
+}
