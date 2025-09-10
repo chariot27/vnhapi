@@ -1,0 +1,79 @@
+// serviço de autenticação e gateway
+syntax = "proto3";
+
+package br.ars.vnhapi.grpc.auth;
+option java_multiple_files = true;
+option java_package = "br.ars.vnhapi.grpc.auth";
+option java_outer_classname = "AuthProto";
+
+// ------------ Tokens ------------
+message TokenPair {
+  string access_token = 1;        // JWT
+  int32  access_expires_in = 2;   // 600s
+  string refresh_token = 3;       // opaco
+  int64  refresh_expires_at = 4;  // epoch millis (até 23:59:59 do dia)
+}
+
+message Claim { string key = 1; string value = 2; }
+
+// ------------ Auth ------------
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+  string device_id = 3;
+  string client_id = 4; // ex.: "android-app"
+}
+
+message LoginResponse {
+  TokenPair tokens = 1;
+  repeated Claim claims = 2;
+}
+
+message RefreshRequest { string refresh_token = 1; string device_id = 2; string client_id = 3; }
+message RefreshResponse { TokenPair tokens = 1; }
+message RevokeRequest  { string refresh_token = 1; string device_id = 2; string client_id = 3; }
+message RevokeResponse { bool revoked = 1; }
+message IntrospectRequest { string access_token = 1; }
+message IntrospectResponse {
+  bool active = 1; string sub = 2; string aud = 3; string scope = 4; int64 exp = 5; string jti = 6;
+}
+
+service AuthService {
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Refresh(RefreshRequest) returns (RefreshResponse);
+  rpc Revoke(RevokeRequest) returns (RevokeResponse);
+  rpc Introspect(IntrospectRequest) returns (IntrospectResponse);
+}
+
+// ------------ Gateway dinâmico ------------
+// "service" deve bater com chaves conhecidas no lado do gateway (ex.: "users","countries","profile","logger").
+// O gateway resolve "service" -> baseUrl (p.ex. ApiUrls) e concatena com "path".
+// Para novos serviços, só registre "service" e sua baseURL no mapa do gateway. Nenhuma mudança no .proto.
+
+message GatewayRequest {
+  string service = 1;                 // ex.: "users", "countries", "profile", "logger"
+  string method  = 2;                 // GET, POST, PUT, DELETE, PATCH
+  string path    = 3;                 // ex.: "/123", "/search"
+  map<string,string> query = 4;       // ?k=v
+  bytes body = 5;                     // opcional
+  map<string,string> headers = 6;     // extras; Authorization vem no metadata gRPC
+  string version = 7;                 // opcional: "v1"
+  string override_base_url = 8;       // opcional: ignora registry e usa URL absoluta
+}
+
+message GatewayResponse {
+  int32 status_code = 1;
+  bytes body = 2;
+  map<string,string> headers = 3;
+}
+
+// Descoberta simples: o cliente pode pedir a tabela de serviços disponíveis (opcional).
+message RouteInfo { string service = 1; string base_url = 2; string version = 3; }
+message ListRoutesRequest {}
+message ListRoutesResponse { repeated RouteInfo routes = 1; }
+
+service GatewayService {
+  // Requer metadata gRPC: authorization: Bearer <access_jwt>
+  rpc Proxy(GatewayRequest) returns (GatewayResponse);
+  rpc ListRoutes(ListRoutesRequest) returns (ListRoutesResponse); // opcional
+}

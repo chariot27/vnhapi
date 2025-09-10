@@ -6,6 +6,8 @@ option java_multiple_files = true;
 option java_package = "br.ars.vnhapi.proto";
 option java_outer_classname = "UserProto";
 
+import "google/protobuf/empty.proto";
+
 message User {
   string id = 1;
   string avatar = 2;
@@ -59,14 +61,10 @@ message ListUsersResponse {
   int32 size = 4;
 }
 
-message EmptyResponse {
-
-}
-
 service UserService {
   rpc Create (CreateUserRequest) returns (User);
   rpc Get    (GetUserRequest)    returns (User);
   rpc Update (UpdateUserRequest) returns (User);
-  rpc Delete (DeleteUserRequest) returns (EmptyResponse);
+  rpc Delete (DeleteUserRequest) returns (google.protobuf.Empty);
   rpc List   (ListUsersRequest)  returns (ListUsersResponse);
 }

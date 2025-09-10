@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package br.ars.vnhapi.grpc.match;
+
+option java_multiple_files = true;
+option java_package = "br.ars.vnhapi.grpc.match";
+option java_outer_classname = "MatchProto";
+
+import "google/protobuf/timestamp.proto";
+
+// Requer metadata gRPC: authorization: Bearer <access_jwt>
+
+enum MatchStatus {
+  MATCH_STATUS_UNSPECIFIED = 0;
+  PENDING   = 1;
+  ACCEPTED  = 2;
+  REJECTED  = 3;
+  CANCELED  = 4;
+}
+
+message MatchInvite {
+  string id = 1;                 // UUID
+  string id_usuario_from = 2;    // UUID
+  string id_usuario_to = 3;      // UUID
+  MatchStatus status = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+// ---- Requests/Responses ----
+message SendInviteRequest {
+  string id_usuario_from = 1; // UUID
+  string id_usuario_to = 2;   // UUID
+}
+
+message SendInviteResponse {
+  MatchInvite invite = 1;
+}
+
+message RespondInviteRequest {
+  string id = 1;      // UUID do convite
+  bool accept = 2;    // true = aceitar, false = rejeitar
+}
+
+message RespondInviteResponse {
+  MatchInvite invite = 1;
+}
+
+message GetInviteRequest {
+  string id = 1; // UUID
+}
+
+message GetInviteResponse {
+  MatchInvite invite = 1;
+}
+
+message ListInvitesRequest {
+  // filtro opcional
+  string user_id = 1;         // UUID: convites relacionados a este usuário
+  string role = 2;            // "from" | "to" | ""(ambos)
+  MatchStatus status = 3;     // opcional
+  int32 page = 4;             // 1-based
+  int32 size = 5;             // default 20
+}
+
+message ListInvitesResponse {
+  repeated MatchInvite items = 1;
+  int32 page = 2;
+  int32 size = 3;
+  int32 total = 4;
+}
+
+service MatchService {
+  rpc SendInvite(SendInviteRequest) returns (SendInviteResponse);
+  rpc RespondInvite(RespondInviteRequest) returns (RespondInviteResponse);
+  rpc GetInvite(GetInviteRequest) returns (GetInviteResponse);
+  rpc ListInvites(ListInvitesRequest) returns (ListInvitesResponse);
+}

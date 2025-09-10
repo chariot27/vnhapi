@@ -1,0 +1,27 @@
+// src/main/kotlin/br/ars/vnhapi/proto/filter.proto
+syntax = "proto3";
+
+package br.ars.vnhapi.proto;
+option java_multiple_files = true;
+option java_package = "br.ars.vnhapi.proto";
+option java_outer_classname = "FilterProto";
+
+import "pubs.proto";
+ // reaproveita a Publication já existente
+
+message FilterByTagsRequest {
+  repeated string tags = 1;   // tags para filtrar
+  bool matchAll = 2;          // true = todas as tags, false = qualquer
+  int32 limit = 3;            // quantidade de itens (scroll infinito)
+  string cursor = 4;          // opcional: último createdAt/id retornado
+}
+
+message FilterByTagsResponse {
+  repeated Publication items = 1; // reaproveitando do pub.proto
+  string nextCursor = 2;
+  bool hasMore = 3;
+}
+
+service FilterService {
+  rpc FilterByTags (FilterByTagsRequest) returns (FilterByTagsResponse);
+}

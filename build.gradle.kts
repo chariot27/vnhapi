@@ -16,6 +16,9 @@ repositories { mavenCentral() }
 
 dependencies {
     // Spring
+    // JWT
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("com.auth0:java-jwt:4.4.0")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")

@@ -1,0 +1,71 @@
+// src/main/kotlin/br/ars/vnhapi/proto/pub.proto
+syntax = "proto3";
+
+package br.ars.vnhapi.proto;
+option java_multiple_files = true;
+option java_package = "br.ars.vnhapi.proto";
+option java_outer_classname = "PubProto";
+
+import "google/protobuf/empty.proto";
+
+// Representa uma publicação da plataforma
+message Publication {
+  string id = 1;                  // UUID da publicação
+  string idUser = 2;              // UUID do usuário dono
+  int32  pubType = 3;             // 1=texto, 2=imagem, 3=vídeo, 4=misto
+  string userTags = 4;            // hashtags/menções do autor
+  string postImgCdnPath = 5;      // link da imagem no CDN
+  string postVidCdnPath = 6;      // link HLS do vídeo no Bunny Stream
+  string postTxt = 7;             // texto da publicação
+  int64 createdAt = 8;            // timestamp unix
+  int64 updatedAt = 9;            // timestamp unix
+}
+
+// Criação de publicação
+message CreatePublicationRequest {
+  string idUser = 1;              // preenchido pelo controller a partir do token JWT
+  int32  pubType = 2;
+  string userTags = 3;
+  string postImgCdnPath = 4;      // base64 → upload no CDN, ou link já existente
+  string postVidCdnPath = 5;      // link HLS vindo da Bunny Stream API
+  string postTxt = 6;
+}
+
+// Atualização de publicação
+message UpdatePublicationRequest {
+  string id = 1;                  // ID da publicação a ser alterada
+  optional int32  pubType = 2;
+  optional string userTags = 3;
+  optional string postImgCdnPath = 4;   // pode ser limpo, substituído ou ignorado
+  optional string postVidCdnPath = 5;   // idem
+  optional string postTxt = 6;
+}
+
+// Obter publicação por ID
+message GetPublicationRequest { string id = 1; }
+
+// Excluir publicação
+message DeletePublicationRequest { string id = 1; }
+
+// Listagem paginada
+message ListPublicationsRequest {
+  string idUser = 1;              // opcional: filtrar publicações de um usuário
+  int32 page = 2;                 // página atual
+  int32 size = 3;                 // tamanho por página
+}
+
+message ListPublicationsResponse {
+  repeated Publication items = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 size = 4;
+}
+
+// Serviço gRPC
+service PubService {
+  rpc Create (CreatePublicationRequest) returns (Publication);
+  rpc Get    (GetPublicationRequest)    returns (Publication);
+  rpc Update (UpdatePublicationRequest) returns (Publication);
+  rpc Delete (DeletePublicationRequest) returns (google.protobuf.Empty);
+  rpc List   (ListPublicationsRequest)  returns (ListPublicationsResponse);
+}
