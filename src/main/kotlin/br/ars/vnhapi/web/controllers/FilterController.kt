@@ -1,5 +1,5 @@
 // src/main/kotlin/br/ars/vnhapi/http/FilterController.kt
-package br.ars.vnhapi.http
+package br.ars.vnhapi.web.controllers
 
 import br.ars.vnhapi.grpc.services.FilterServiceImpl
 import br.ars.vnhapi.proto.FilterByTagsRequest
